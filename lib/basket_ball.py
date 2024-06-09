@@ -182,3 +182,64 @@ def game_dict():
             ]
         }
     }
+
+data = game_dict()
+teams = [data["home"], data["away"]]
+players = data["home"]["players"] + data["away"]["players"]
+brands = set([player["shoe_brand"] for player in players])
+sorted_brands = sorted(brands)
+
+def fetch_team_details(func):
+    def wrapper(name):
+        for team in teams:
+            if team["team_name"] == name:
+                return func(team)
+        raise ValueError(f"Team with name {name} not found")
+    return wrapper
+
+
+def fetch_player_details(func):
+    def wrapper(name):
+        for player in players:
+            if player["name"] == name:
+                return func(player)
+        raise ValueError(f"Player with name {name} not found")
+    return wrapper
+
+@fetch_player_details
+def num_points_per_game(player):
+    return player["points_per_game"]
+
+@fetch_player_details
+def player_age(player):
+    return player["age"]
+
+@fetch_team_details
+def team_colors(team):
+    return team["colors"]
+
+def team_names():
+    return[data["home"]["team_name"], data["away"]["team_name"]]
+
+@fetch_team_details
+def player_numbers(team):
+    players = team["players"]
+    return[player["number"] for player in players]
+
+@fetch_player_details
+def player_stats(player):
+    return player
+
+def average_rebounds_by_shoe_brand():
+    brand_dict = {}
+    for brand in sorted_brands:
+        total_rebounds =0
+        total_players =0
+        for player in players:
+            if player["shoe_brand"] == brand:
+                total_rebounds += player["rebounds_per_game"]
+                total_players += 1
+        average_rebounds = total_rebounds/total_players
+        brand_dict[brand] = average_rebounds
+    for key, value in brand_dict.items():  # Use items() method to iterate over dictionary items
+        print(f"{key}: {value:.2f}")
